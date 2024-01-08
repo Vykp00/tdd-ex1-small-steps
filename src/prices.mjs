@@ -1,3 +1,4 @@
+import { Temporal } from "@js-temporal/polyfill";
 import "./polyfills";
 import express from "express";
 
@@ -76,24 +77,22 @@ function createApp(database) {
 
   function calculateReduction(date) {
     let reduction = 0;
-    if (date && isMonday(date) && !isHoliday(date)) {
+    if (date && isMonday(convert(date)) && !isHoliday(convert(date))) {
       reduction = 35;
     }
     return reduction;
   }
 
   function isMonday(date) {
-    return date.getDay() === 1;
+    return date.dayOfWeek === 1;
   }
 
   function isHoliday(date) {
     const holidays = database.getHolidays();
     for (let row of holidays) {
-      let holiday = new Date(row.holiday);
-      let holiday2 = convert(holiday);
-      let date2 = convert(date);
+      let holiday = Temporal.PlainDate.from(row.holiday)
       if (
-        date2 && date2.equals(holiday2)
+        date && date.equals(holiday)
       ) {
         return true;
       }
